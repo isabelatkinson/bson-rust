@@ -439,6 +439,7 @@ macro_rules! rawdoc {
 ///
 /// This macro generates a `SerializeAs`/`DeserializeAs` implementation for a given type,
 /// with optional struct-level attributes like `#[derive(...)]` or `/// doc comments`.
+#[cfg(feature = "serde")]
 macro_rules! serde_conv_doc {
     ($(#[$meta:meta])* $vis:vis $m:ident, $t:ty, $ser:expr, $de:expr) => {
         #[allow(non_camel_case_types)]
@@ -492,4 +493,5 @@ macro_rules! serde_conv_doc {
     };
 }
 
+#[cfg(feature = "serde")]
 pub(crate) use serde_conv_doc;
