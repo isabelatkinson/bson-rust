@@ -1,4 +1,4 @@
-use std::convert::TryInto;
+use std::{convert::TryInto, marker::PhantomData};
 
 use crate::{
     Bson,
@@ -360,5 +360,82 @@ impl<'a> From<Utf8LossyBson<'a>> for RawBson {
             Utf8LossyBson::DbPointer(p) => RawBson::DbPointer(p),
             Utf8LossyBson::RegularExpression(r) => RawBson::RegularExpression(r),
         }
+    }
+}
+
+/// An iterator over views of the elements in a document. Construct by calling
+/// [`RawDocument::iter_element_views`],
+/// [`RawDocumentBuf::iter_element_views`](crate::RawDocumentBuf::iter_element_views), or
+/// [`RawArray::iter_element_views`](crate::RawArray::iter_element_views).
+///
+/// This iterator only validates the structure needed to locate each element (element type tags,
+/// lengths, null terminators, and bounds). It does not perform any UTF-8 validation; keys and
+/// string-like values are exposed as raw bytes so that the caller can decide how to decode them.
+/// An error is returned and iteration ends if an element cannot be located.
+pub struct RawElementViewIter<'a> {
+    _marker: PhantomData<&'a [u8]>,
+}
+
+impl<'a> RawElementViewIter<'a> {
+    pub(crate) fn new(_doc: &'a RawDocument) -> Self {
+        todo!()
+    }
+}
+
+impl<'a> Iterator for RawElementViewIter<'a> {
+    type Item = Result<RawElementView<'a>>;
+
+    fn next(&mut self) -> Option<Result<RawElementView<'a>>> {
+        todo!()
+    }
+}
+
+/// A view of the bytes of an element contained in a [`RawDocument`] or
+/// [`RawDocumentBuf`](crate::RawDocumentBuf), yielded by [`RawElementViewIter`]. Neither the key
+/// nor the value has been validated as UTF-8.
+///
+/// Call [`RawElementView::value`] to parse the value, or convert the view into a [`RawElement`]
+/// via its `TryFrom` implementation to validate the key.
+#[derive(Clone)]
+pub struct RawElementView<'a> {
+    element_type: ElementType,
+    key: &'a [u8],
+    value: &'a [u8],
+}
+
+impl<'a> RawElementView<'a> {
+    /// The type of the element.
+    pub fn element_type(&self) -> ElementType {
+        self.element_type
+    }
+
+    /// The bytes of the document key the element corresponds to, excluding the null terminator.
+    /// These bytes are not guaranteed to be valid UTF-8.
+    pub fn key_bytes(&self) -> &'a [u8] {
+        self.key
+    }
+
+    /// The bytes of the element's value, as encoded in the document. This includes any
+    /// type-specific framing; for example, the value bytes of a string include its length prefix
+    /// and null terminator. These bytes are not guaranteed to contain valid UTF-8.
+    pub fn value_bytes(&self) -> &'a [u8] {
+        self.value
+    }
+
+    /// Parses this element's value into a [`RawBsonRef`] and returns an error if the underlying
+    /// bytes are invalid, including if any strings in the value are not valid UTF-8. The key is
+    /// not validated.
+    pub fn value(&self) -> Result<RawBsonRef<'a>> {
+        todo!()
+    }
+}
+
+impl<'a> TryFrom<RawElementView<'a>> for RawElement<'a> {
+    type Error = Error;
+
+    /// Validates the view's key and converts it into a [`RawElement`]. Returns an error if the key
+    /// is not valid UTF-8.
+    fn try_from(_view: RawElementView<'a>) -> Result<Self> {
+        todo!()
     }
 }

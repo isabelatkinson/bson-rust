@@ -160,7 +160,7 @@ pub use self::{
     cstr::{CStr, CString, IsValidCStr, assert_valid_cstr, cstr, validate_cstr},
     document::RawDocument,
     document_buf::{BindRawBsonRef, BindValue, RawDocumentBuf},
-    iter::{Iter, RawElement, RawIter},
+    iter::{Iter, RawElement, RawElementView, RawElementViewIter, RawIter},
 };
 
 pub(crate) const MIN_BSON_STRING_SIZE: i32 = 4 + 1; // 4 bytes for length, one byte for null terminator
